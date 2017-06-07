@@ -18,41 +18,24 @@ def oauth_login(consumer_key, consumer_secret):
 def batch(api):
 
     end_while = False
-    favorite_page = last_page_quota # Incremental variable for pagination
-    stored_favorites = [] # Array to store favorites
 
     while end_while is False:
 
         try:
-            favorites = api.favorites(page = favorite_page) # Fetch the current page
+            favorites = api.favorites(page = 1)
 
             if len(favorites) > 0:
 
                 for favorite in favorites:
 
-                    # Add the favorite URL to the array
-                    stored_favorites.append(
-                        'https://twitter.com/' + favorite.author.screen_name + '/status/' + favorite.id_str
-                    )
-
-                favorite_page += 1
+                    api.destroy_favorite(favorite.id_str)
 
             else:
                 end_while = True
 
         except tweepy.error.RateLimitError:
-            print('Rate limit exceded. Last page fetched: ' + str(favorite_page))
+            print('Rate limit exceded.')
             end_while = True
-
-
-    # Save the favorites into a file
-    stored_file = open(parameters.favourites_file_name, 'a')
-
-    for storedFavorite in stored_favorites:
-        stored_file.write(storedFavorite + '\n')
-
-    stored_file.close()
-
 
 if __name__ == "__main__":
     # authorize twitter, initialize tweepy
